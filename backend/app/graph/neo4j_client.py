@@ -100,10 +100,12 @@ class GraphRepository:
     def get_graph(self) -> dict[str, list[dict[str, Any]]]:
         nodes_query = """
         MATCH (n)
+        WHERE NOT n:InsightSnapshot
         RETURN elementId(n) AS id, labels(n) AS labels, properties(n) AS props
         """
         edges_query = """
         MATCH (a)-[r]->(b)
+        WHERE NOT a:InsightSnapshot AND NOT b:InsightSnapshot
         RETURN elementId(r) AS id, elementId(a) AS source, elementId(b) AS target, type(r) AS type
         """
         with self._driver.session() as session:
@@ -112,7 +114,7 @@ class GraphRepository:
                     "id": row["id"],
                     "label": row["props"].get("title") or row["props"].get("name") or "Unknown",
                     "type": (row["labels"][0].lower() if row["labels"] else "unknown"),
-                    "properties": row["props"],
+                    "properties": self._to_json_safe(row["props"]),
                 }
                 for row in session.run(nodes_query).data()
             ]
@@ -126,6 +128,16 @@ class GraphRepository:
                 for row in session.run(edges_query).data()
             ]
             return {"nodes": nodes, "edges": edges}
+
+    def _to_json_safe(self, value: Any) -> Any:
+        if value is None or isinstance(value, (str, int, float, bool)):
+            return value
+        if isinstance(value, list):
+            return [self._to_json_safe(item) for item in value]
+        if isinstance(value, dict):
+            return {str(k): self._to_json_safe(v) for k, v in value.items()}
+        # Handles Neo4j temporal and other driver-specific types
+        return str(value)
 
     def get_central_books(self, limit: int = 5) -> list[dict[str, Any]]:
         gds_query = """
