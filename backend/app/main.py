@@ -29,7 +29,12 @@ def _build_llm_client() -> OpenAICompatibleJSONClient | None:
         if not api_key:
             return None
         base_url = None
-        return OpenAICompatibleJSONClient(model=model, api_key=api_key, base_url=base_url)
+        return OpenAICompatibleJSONClient(
+            model=model,
+            api_key=api_key,
+            base_url=base_url,
+            provider="openai",
+        )
 
     def build_openrouter() -> OpenAICompatibleJSONClient | None:
         model = settings.openrouter_model
@@ -37,12 +42,22 @@ def _build_llm_client() -> OpenAICompatibleJSONClient | None:
         if not api_key:
             return None
         base_url = settings.openrouter_base_url
-        return OpenAICompatibleJSONClient(model=model, api_key=api_key, base_url=base_url)
+        return OpenAICompatibleJSONClient(
+            model=model,
+            api_key=api_key,
+            base_url=base_url,
+            provider="openrouter",
+        )
 
     def build_ollama() -> OpenAICompatibleJSONClient:
         model = settings.ollama_model
         base_url = settings.ollama_base_url
-        return OpenAICompatibleJSONClient(model=model, api_key=settings.ollama_api_key, base_url=base_url)
+        return OpenAICompatibleJSONClient(
+            model=model,
+            api_key=settings.ollama_api_key,
+            base_url=base_url,
+            provider="ollama",
+        )
 
     if provider == "openai":
         return build_openai() or build_openrouter()

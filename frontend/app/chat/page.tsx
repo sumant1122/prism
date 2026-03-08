@@ -9,6 +9,9 @@ type ChatResponse = {
   evidence_nodes: Array<{ id: string; label: string; type: string }>;
   evidence_edges: Array<{ id: string; source: string; target: string; type: string }>;
   context_size: { nodes: number; edges: number };
+  mode: string;
+  provider: string;
+  fallback_reason?: string | null;
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
@@ -95,6 +98,14 @@ export default function ChatPage() {
             <p>
               <strong>Context:</strong> {result.context_size.nodes} nodes, {result.context_size.edges} edges
             </p>
+            <p>
+              <strong>Mode:</strong> {result.mode} ({result.provider})
+            </p>
+            {result.fallback_reason && (
+              <p>
+                <strong>Fallback reason:</strong> {result.fallback_reason}
+              </p>
+            )}
           </div>
           <div className="card">
             <h3 style={{ marginTop: 0 }}>Evidence Nodes</h3>
@@ -113,4 +124,3 @@ export default function ChatPage() {
     </div>
   );
 }
-

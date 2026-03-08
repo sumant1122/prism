@@ -27,11 +27,13 @@ class OpenAICompatibleJSONClient:
         model: str,
         api_key: str | None = None,
         base_url: str | None = None,
+        provider: str = "openai-compatible",
         default_headers: dict[str, str] | None = None,
         timeout_seconds: float = 30.0,
     ) -> None:
         self._base_url = (base_url or "https://api.openai.com/v1").rstrip("/")
         self._api_key = api_key
+        self.provider = provider
         self._headers = default_headers or {}
         self._timeout_seconds = timeout_seconds
         self._model = model

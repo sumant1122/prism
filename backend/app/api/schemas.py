@@ -46,3 +46,6 @@ class ChatResponse(BaseModel):
     evidence_nodes: list[dict] = Field(default_factory=list)
     evidence_edges: list[dict] = Field(default_factory=list)
     context_size: dict = Field(default_factory=dict)
+    mode: str = "fallback"
+    provider: str = "none"
+    fallback_reason: str | None = None

@@ -14,6 +14,9 @@ class ChatResult:
     evidence_nodes: list[dict]
     evidence_edges: list[dict]
     context_size: dict[str, int]
+    mode: str
+    provider: str
+    fallback_reason: str | None
 
 
 class ChatService:
@@ -39,4 +42,7 @@ class ChatService:
             evidence_nodes=cited_nodes[:20],
             evidence_edges=edges[:40],
             context_size={"nodes": len(nodes), "edges": len(edges)},
+            mode=str(output.get("mode") or "fallback"),
+            provider=str(output.get("provider") or "none"),
+            fallback_reason=(str(output.get("fallback_reason")) if output.get("fallback_reason") else None),
         )

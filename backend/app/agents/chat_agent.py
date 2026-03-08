@@ -17,8 +17,9 @@ class ChatAgent:
         edges: list[dict[str, Any]],
         graph_stats: dict[str, Any],
     ) -> dict[str, Any]:
+        provider = getattr(self._llm_client, "provider", "none") if self._llm_client else "none"
         if not self._llm_client:
-            return self._fallback(question, nodes, edges)
+            return self._fallback(question, nodes, edges, provider=provider, reason="no_llm_client")
 
         context = {
             "graph_stats": graph_stats,
@@ -37,11 +38,28 @@ class ChatAgent:
                 "answer": str(payload.get("answer") or "").strip(),
                 "confidence": self._normalize_confidence(payload.get("confidence")),
                 "citations": [str(x) for x in payload.get("citations", [])][:12],
+                "mode": "llm",
+                "provider": provider,
+                "fallback_reason": None,
             }
-        except LLMError:
-            return self._fallback(question, nodes, edges)
+        except LLMError as exc:
+            return self._fallback(
+                question,
+                nodes,
+                edges,
+                provider=provider,
+                reason=f"llm_error: {str(exc)[:240]}",
+            )
 
-    def _fallback(self, question: str, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]) -> dict[str, Any]:
+    def _fallback(
+        self,
+        question: str,
+        nodes: list[dict[str, Any]],
+        edges: list[dict[str, Any]],
+        *,
+        provider: str,
+        reason: str,
+    ) -> dict[str, Any]:
         books = [n for n in nodes if n.get("type") == "book"]
         concepts = [n for n in nodes if n.get("type") == "concept"]
         mentions = [e for e in edges if e.get("type") == "MENTIONS"]
@@ -50,7 +68,14 @@ class ChatAgent:
             f"The subgraph contains {len(books)} books, {len(concepts)} concepts, and {len(mentions)} mention links."
         )
         citations = [str(n["id"]) for n in books[:3] if n.get("id")]
-        return {"answer": answer, "confidence": 0.45, "citations": citations}
+        return {
+            "answer": answer,
+            "confidence": 0.45,
+            "citations": citations,
+            "mode": "fallback",
+            "provider": provider,
+            "fallback_reason": reason,
+        }
 
     def _normalize_confidence(self, value: Any) -> float:
         try:
@@ -58,4 +83,3 @@ class ChatAgent:
         except (TypeError, ValueError):
             return 0.5
         return max(0.0, min(1.0, parsed))
-

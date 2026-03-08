@@ -64,4 +64,7 @@ async def chat(payload: ChatRequest, service: ChatService = Depends(get_chat_ser
         evidence_nodes=result.evidence_nodes,
         evidence_edges=result.evidence_edges,
         context_size=result.context_size,
+        mode=result.mode,
+        provider=result.provider,
+        fallback_reason=result.fallback_reason,
     )
