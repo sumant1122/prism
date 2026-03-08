@@ -15,9 +15,9 @@ class ConceptAgent:
     def __init__(self, llm_client: LLMClient | None = None) -> None:
         self._llm_client = llm_client
 
-    def extract(self, book_summary: str, fallback_subjects: list[str] | None = None) -> ConceptExtractionResult:
+    def extract(self, resource_summary: str, fallback_subjects: list[str] | None = None) -> ConceptExtractionResult:
         fallback_subjects = fallback_subjects or []
-        summary = (book_summary or "").strip()
+        summary = (resource_summary or "").strip()
         if not summary and not fallback_subjects:
             return ConceptExtractionResult(concepts=[], fields=[])
 
@@ -25,12 +25,12 @@ class ConceptAgent:
             return self._heuristic_extract(summary, fallback_subjects)
 
         system_prompt = (
-            "You extract concepts from books. Return strict JSON with keys: "
+            "You extract concepts from enterprise resources. Return strict JSON with keys: "
             "concepts (string array) and fields (string array)."
         )
         user_prompt = (
-            "Extract important concepts from the following book.\n\n"
-            f"Book summary:\n{summary}\n\n"
+            "Extract important concepts from the following resource.\n\n"
+            f"Resource summary:\n{summary}\n\n"
             "Return JSON:\n"
             '{"concepts": [], "fields": []}'
         )
@@ -55,4 +55,3 @@ class ConceptAgent:
             words = [w.strip(".,:;!?()[]{}").lower() for w in summary.split()]
             concepts = [w for w in words if len(w) > 7][:8]
         return ConceptExtractionResult(concepts=concepts, fields=fields)
-

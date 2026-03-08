@@ -57,13 +57,13 @@ export default function ChatPage() {
           <textarea
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder="What are the most connected software engineering books in my graph?"
+            placeholder="Which resources have the highest blast radius in the platform layer?"
           />
           <div className="row">
             <select value={scope} onChange={(event) => setScope(event.target.value)}>
               <option value="auto">Auto scope</option>
-              <option value="book">Books</option>
-              <option value="author">Authors</option>
+              <option value="resource">Resources</option>
+              <option value="platform">Platforms</option>
               <option value="concept">Concepts</option>
               <option value="field">Fields</option>
             </select>

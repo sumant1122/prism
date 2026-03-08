@@ -1,6 +1,6 @@
 # Prism
 
-Prism is an enterprise intelligence platform that maps systems, resources, concepts, owners, and cross-platform relationships using AI.
+Prism is an enterprise intelligence platform that maps systems, resources, concepts, ownership, and cross-platform relationships using AI.
 
 ## What It Does
 
@@ -16,6 +16,13 @@ Prism is an enterprise intelligence platform that maps systems, resources, conce
   - `GET /graph`
   - `GET /insights`
   - `POST /chat`
+
+## Product Focus
+
+- Platform engineering visibility
+- Dependency intelligence and blast-radius exploration
+- Ownership and domain coverage analytics
+- Graph-grounded natural language Q&A
 
 ## Architecture
 
@@ -54,5 +61,5 @@ Open:
 
 ## Notes
 
-- This project was bootstrapped from `bookgraph/` and adapted for enterprise data mapping.
 - ServiceNow ingestion is currently a connector stub pattern; replace with real API auth/query flow for production.
+- Default Neo4j credentials in compose are isolated for Prism (`neo4j/prismneo`) with a dedicated Docker volume.

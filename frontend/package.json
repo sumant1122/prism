@@ -1,5 +1,5 @@
 {
-  "name": "bookgraph-frontend",
+  "name": "prism-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -21,4 +21,3 @@
     "typescript": "5.8.2"
   }
 }
-

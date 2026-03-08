@@ -27,7 +27,7 @@ class ChatAgent:
             "edges": edges[:220],
         }
         system_prompt = (
-            "You answer user questions about a book knowledge graph. "
+            "You answer user questions about an enterprise resource intelligence graph. "
             "Use only provided graph context. Return strict JSON with keys: "
             "answer (string), confidence (number 0..1), citations (array of node ids)."
         )
@@ -60,14 +60,14 @@ class ChatAgent:
         provider: str,
         reason: str,
     ) -> dict[str, Any]:
-        books = [n for n in nodes if n.get("type") == "book"]
+        resources = [n for n in nodes if n.get("type") == "resource"]
         concepts = [n for n in nodes if n.get("type") == "concept"]
         mentions = [e for e in edges if e.get("type") == "MENTIONS"]
         answer = (
             f"I analyzed {len(nodes)} nodes and {len(edges)} edges for your question: '{question}'. "
-            f"The subgraph contains {len(books)} books, {len(concepts)} concepts, and {len(mentions)} mention links."
+            f"The subgraph contains {len(resources)} resources, {len(concepts)} concepts, and {len(mentions)} mention links."
         )
-        citations = [str(n["id"]) for n in books[:3] if n.get("id")]
+        citations = [str(n["id"]) for n in resources[:3] if n.get("id")]
         return {
             "answer": answer,
             "confidence": 0.45,

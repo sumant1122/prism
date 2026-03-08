@@ -3,10 +3,6 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 
-class AddBookRequest(BaseModel):
-    title: str = Field(min_length=1, max_length=300)
-
-
 class AddResourceRequest(BaseModel):
     source: str = Field(pattern="^(github|servicenow|manual)$")
     identifier: str = Field(min_length=1, max_length=300)
@@ -15,17 +11,6 @@ class AddResourceRequest(BaseModel):
     owner: str | None = None
     resource_count: int | None = None
     tags: list[str] = Field(default_factory=list)
-
-
-class BookResponse(BaseModel):
-    title: str
-    author: str
-    publish_year: int | None = None
-    subjects: list[str] = Field(default_factory=list)
-    description: str = ""
-    concepts: list[str] = Field(default_factory=list)
-    fields: list[str] = Field(default_factory=list)
-    relationships_created: int = 0
 
 
 class ResourceResponse(BaseModel):
@@ -47,7 +32,7 @@ class GraphResponse(BaseModel):
 
 
 class InsightResponse(BaseModel):
-    central_books: dict
+    central_resources: dict
     clusters: dict
     missing_topics: dict
     graph_stats: dict = Field(default_factory=dict)
@@ -65,7 +50,7 @@ class InsightResponse(BaseModel):
 
 class ChatRequest(BaseModel):
     question: str = Field(min_length=2, max_length=2000)
-    scope: str = Field(default="auto", pattern="^(auto|book|author|concept|field)$")
+    scope: str = Field(default="auto", pattern="^(auto|resource|platform|concept|field)$")
     k: int = Field(default=20, ge=5, le=100)
 
 

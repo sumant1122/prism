@@ -22,7 +22,7 @@ export default function RootLayout({
                   <p className="brand-subtitle">AI Knowledge Graph for enterprise systems, resources, and dependencies</p>
                 </div>
                 <nav className="nav">
-                  <Link href="/books">Resources</Link>
+                  <Link href="/resources">Resources</Link>
                   <Link href="/graph">Graph</Link>
                   <Link href="/insights">Insights</Link>
                   <Link href="/chat">Chat</Link>

@@ -4,13 +4,8 @@ from fastapi import Request
 
 from app.graph.neo4j_client import GraphRepository
 from app.insights.graph_insights import GraphInsightEngine
-from app.services.book_service import BookService
 from app.services.chat_service import ChatService
 from app.services.enterprise_service import EnterpriseService
-
-
-def get_book_service(request: Request) -> BookService:
-    return request.app.state.book_service
 
 
 def get_graph_repo(request: Request) -> GraphRepository:

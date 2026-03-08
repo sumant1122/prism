@@ -10,11 +10,9 @@ class Settings(BaseSettings):
     app_host: str = Field(default="0.0.0.0")
     app_port: int = Field(default=8000)
 
-    openlibrary_base_url: str = Field(default="https://openlibrary.org")
-
     neo4j_uri: str = Field(default="bolt://neo4j:7687")
     neo4j_username: str = Field(default="neo4j")
-    neo4j_password: str = Field(default="bookgraph")
+    neo4j_password: str = Field(default="prismneo")
 
     model_provider: str = Field(default="auto")
 

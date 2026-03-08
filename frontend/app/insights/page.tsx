@@ -3,34 +3,34 @@
 import { useEffect, useState } from "react";
 
 type InsightsResponse = {
-  central_books: {
+  central_resources: {
     summary: string;
-    central_books: Array<{ title: string; score: number }>;
+    central_resources: Array<{ name: string; score: number }>;
     evidence?: { nodes: Array<{ label: string }>; edges: Array<{ type: string }> };
   };
   clusters: {
     cluster_count: number;
-    clusters: Array<{ communityId: string; books: string[] }>;
+    clusters: Array<{ communityId: string; resources: string[] }>;
     evidence?: { nodes: Array<{ label: string }>; edges: Array<{ type: string }> };
   };
   missing_topics: {
     summary: string;
-    missing_topics: Array<{ field: string; bookCount: number }>;
+    missing_topics: Array<{ field: string; resourceCount: number }>;
     evidence?: { nodes: Array<{ label: string }>; edges: Array<{ type: string }> };
   };
   graph_stats: {
-    books: number;
-    authors: number;
+    resources: number;
+    platforms: number;
     concepts: number;
     fields: number;
-    book_edges: number;
-    book_relationship_density: number;
+    resource_edges: number;
+    inter_resource_relationship_density: number;
     summary: string;
   };
   coverage: {
-    top_fields: Array<{ field: string; bookCount: number }>;
-    top_concepts: Array<{ concept: string; bookCount: number }>;
-    unlinked_books: Array<{ title: string; publish_year?: number | null }>;
+    top_fields: Array<{ field: string; resourceCount: number }>;
+    top_concepts: Array<{ concept: string; resourceCount: number }>;
+    unlinked_resources: Array<{ name: string }>;
   };
   recommendations: Array<{ action: string; effort: string; type: string }>;
   narrative: {
@@ -55,20 +55,20 @@ type InsightsResponse = {
   };
   reading_paths: Array<{
     field: string;
-    path: Array<{ title: string; publish_year?: number | null; score: number }>;
+    path: Array<{ name: string; score: number }>;
   }>;
   overlap_contradiction: {
     overlap_count: number;
     contradiction_count: number;
     samples: Array<{ source: string; relation: string; target: string }>;
   };
-  sparse_bridges: Array<{ field_a: string; field_b: string; books_a: number; books_b: number }>;
+  sparse_bridges: Array<{ field_a: string; field_b: string; resources_a: number; resources_b: number }>;
   field_dashboards: Array<{
     field: string;
-    book_count: number;
-    top_books: Array<{ title: string }>;
+    resource_count: number;
+    top_resources: Array<{ name: string }>;
     top_concepts: Array<{ concept: string }>;
-    isolated_books: Array<{ title: string }>;
+    isolated_resources: Array<{ name: string }>;
     unanswered_questions: string[];
   }>;
   freshness: {
@@ -129,16 +129,16 @@ export default function InsightsPage() {
         <p>{data.time_delta.summary}</p>
       </div>
       <div className="card">
-        <h3 className="page-title">Central Books</h3>
-        <p>{data.central_books.summary}</p>
+        <h3 className="page-title">Central Resources</h3>
+        <p>{data.central_resources.summary}</p>
         <p>
-          {data.central_books.central_books
-            .map((b) => `${b.title} (${b.score.toFixed(2)})`)
+          {data.central_resources.central_resources
+            .map((r) => `${r.name} (${r.score.toFixed(2)})`)
             .join(", ") || "No centrality data yet."}
         </p>
         <p>
           <strong>Evidence:</strong>{" "}
-          {data.central_books.evidence?.nodes?.map((n) => n.label).join(", ") || "No evidence"}
+          {data.central_resources.evidence?.nodes?.map((n) => n.label).join(", ") || "No evidence"}
         </p>
       </div>
       <div className="card">
@@ -147,7 +147,7 @@ export default function InsightsPage() {
         <p>
           {data.clusters.clusters
             .slice(0, 3)
-            .map((cluster) => `${cluster.communityId}: ${cluster.books.slice(0, 3).join(", ")}`)
+            .map((cluster) => `${cluster.communityId}: ${cluster.resources.slice(0, 3).join(", ")}`)
             .join(" | ") || "No cluster data yet."}
         </p>
       </div>
@@ -156,7 +156,7 @@ export default function InsightsPage() {
         <p>{data.missing_topics.summary}</p>
         <p>
           {data.missing_topics.missing_topics
-            .map((topic) => `${topic.field} (${topic.bookCount})`)
+            .map((topic) => `${topic.field} (${topic.resourceCount})`)
             .join(", ") || "No gaps found."}
         </p>
       </div>
@@ -164,17 +164,17 @@ export default function InsightsPage() {
         <h3 className="page-title">Coverage</h3>
         <p>
           <strong>Top fields:</strong>{" "}
-          {data.coverage.top_fields.map((f) => `${f.field} (${f.bookCount})`).join(", ") || "N/A"}
+          {data.coverage.top_fields.map((f) => `${f.field} (${f.resourceCount})`).join(", ") || "N/A"}
         </p>
         <p>
           <strong>Top concepts:</strong>{" "}
           {data.coverage.top_concepts
-            .map((c) => `${c.concept} (${c.bookCount})`)
+            .map((c) => `${c.concept} (${c.resourceCount})`)
             .join(", ") || "N/A"}
         </p>
         <p>
-          <strong>Unlinked books:</strong>{" "}
-          {data.coverage.unlinked_books.map((b) => b.title).join(", ") || "None"}
+          <strong>Unlinked resources:</strong>{" "}
+          {data.coverage.unlinked_resources.map((r) => r.name).join(", ") || "None"}
         </p>
       </div>
       <div className="card">
@@ -197,7 +197,7 @@ export default function InsightsPage() {
         <h3 className="page-title">Reading Paths</h3>
         <p>
           {data.reading_paths
-            .map((path) => `${path.field}: ${path.path.map((item) => item.title).join(" -> ")}`)
+            .map((path) => `${path.field}: ${path.path.map((item) => item.name).join(" -> ")}`)
             .join(" | ") || "No reading paths yet."}
         </p>
       </div>
@@ -229,7 +229,7 @@ export default function InsightsPage() {
             .slice(0, 3)
             .map(
               (d) =>
-                `${d.field}: books(${d.top_books.map((b) => b.title).join(", ")}), concepts(${d.top_concepts
+                `${d.field}: resources(${d.top_resources.map((r) => r.name).join(", ")}), concepts(${d.top_concepts
                   .map((c) => c.concept)
                   .join(", ")})`
             )

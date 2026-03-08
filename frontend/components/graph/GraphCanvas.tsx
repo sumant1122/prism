@@ -21,9 +21,9 @@ type GraphPayload = {
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
 function nodeColor(type: string): string {
-  if (type === "book") return "#0e7a6d";
+  if (type === "resource") return "#0e7a6d";
   if (type === "concept") return "#ec6a3c";
-  if (type === "author") return "#385e9d";
+  if (type === "platform") return "#385e9d";
   return "#8f8f8f";
 }
 

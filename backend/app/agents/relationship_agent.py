@@ -38,14 +38,14 @@ class RelationshipAgent:
             return self._heuristic_relationship(source_book, target_book)
 
         system_prompt = (
-            "Determine if there is a meaningful intellectual relationship between two books. "
+            "Determine if there is a meaningful architectural or operational relationship between two enterprise resources. "
             "Return strict JSON with keys: source, relation, target. "
             "Allowed relations: RELATED_TO, INFLUENCED_BY, CONTRADICTS, EXPANDS, BELONGS_TO_FIELD. "
             "If no relationship exists, return relation as NONE."
         )
         user_prompt = (
-            f"Book A:\n{source_book}\n\n"
-            f"Book B:\n{target_book}\n\n"
+            f"Resource A:\n{source_book}\n\n"
+            f"Resource B:\n{target_book}\n\n"
             "Return JSON."
         )
 
@@ -78,4 +78,3 @@ class RelationshipAgent:
             return RelationshipResult(source=source, relation="INFLUENCED_BY", target=target)
 
         return None
-

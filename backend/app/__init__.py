@@ -1,2 +1,1 @@
-"""BookGraph backend application package."""
-
+"""Prism backend application package."""

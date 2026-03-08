@@ -14,7 +14,7 @@ class InsightAgent:
             return self._fallback_summary(insight_payload, reason="no_llm_client")
 
         system_prompt = (
-            "You are a graph intelligence analyst for a book knowledge graph. "
+            "You are an enterprise intelligence analyst for a resource knowledge graph. "
             "Return strict JSON with keys: summary (string), key_findings (string array), "
             "recommended_actions (string array), graph_health_score (integer 0-100)."
         )
@@ -37,25 +37,25 @@ class InsightAgent:
 
     def _fallback_summary(self, payload: dict[str, Any], reason: str) -> dict[str, Any]:
         stats = payload.get("graph_stats", {})
-        books = int(stats.get("books", 0))
-        density = float(stats.get("book_relationship_density", 0))
-        central = payload.get("central_books", {}).get("central_books", [])
-        top_title = central[0]["title"] if central else "N/A"
+        resources = int(stats.get("resources", 0))
+        density = float(stats.get("inter_resource_relationship_density", 0))
+        central = payload.get("central_resources", {}).get("central_resources", [])
+        top_name = central[0]["name"] if central else "N/A"
         gaps = payload.get("missing_topics", {}).get("missing_topics", [])
         gap_fields = [row["field"] for row in gaps[:3] if row.get("field")]
-        health = min(100, int((books * 4) + (density * 120)))
+        health = min(100, int((resources * 4) + (density * 120)))
         findings = [
-            f"Top central book: {top_title}",
-            f"Book relationship density: {density:.2f}",
-            f"Total books analyzed: {books}",
+            f"Top central resource: {top_name}",
+            f"Inter-resource relationship density: {density:.2f}",
+            f"Total resources analyzed: {resources}",
         ]
         actions = [
-            "Add books that strengthen weak topic areas.",
-            "Increase cross-book relationships for better insight quality.",
-            "Add books around underrepresented fields to reduce graph sparsity.",
+            "Ingest resources that strengthen weak topic areas.",
+            "Increase inter-resource relationships for better insight quality.",
+            "Add resources around underrepresented fields to reduce graph sparsity.",
         ]
         if gap_fields:
-            actions[0] = f"Add books in sparse fields: {', '.join(gap_fields)}."
+            actions[0] = f"Add resources in sparse fields: {', '.join(gap_fields)}."
         reason_message = {
             "no_llm_client": "Generated deterministic insights because no LLM client was configured.",
             "llm_error": "Generated deterministic insights because the LLM call failed or returned invalid JSON.",
