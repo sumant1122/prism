@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any, Protocol
 
-from openai import OpenAI
+import httpx
 
 
 class LLMError(Exception):
@@ -28,32 +28,42 @@ class OpenAICompatibleJSONClient:
         api_key: str | None = None,
         base_url: str | None = None,
         default_headers: dict[str, str] | None = None,
+        timeout_seconds: float = 30.0,
     ) -> None:
-        client_kwargs: dict[str, Any] = {
-            "api_key": api_key or "not-required",
-        }
-        if base_url:
-            client_kwargs["base_url"] = base_url
-        if default_headers:
-            client_kwargs["default_headers"] = default_headers
-
-        self._client = OpenAI(**client_kwargs)
+        self._base_url = (base_url or "https://api.openai.com/v1").rstrip("/")
+        self._api_key = api_key
+        self._headers = default_headers or {}
+        self._timeout_seconds = timeout_seconds
         self._model = model
 
     def generate_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, Any]:
+        headers = {"Content-Type": "application/json", **self._headers}
+        if self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
+        payload = {
+            "model": self._model,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        }
         try:
-            response = self._client.chat.completions.create(
-                model=self._model,
-                response_format={"type": "json_object"},
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
+            response = httpx.post(
+                f"{self._base_url}/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=self._timeout_seconds,
             )
+            response.raise_for_status()
+            data = response.json()
         except Exception as exc:  # noqa: BLE001
             raise LLMError(str(exc)) from exc
 
-        content = response.choices[0].message.content or "{}"
+        try:
+            content = data["choices"][0]["message"]["content"] or "{}"
+        except (KeyError, IndexError, TypeError) as exc:
+            raise LLMError(f"Malformed model response: {data}") from exc
         try:
             parsed = json.loads(content)
             if not isinstance(parsed, dict):
