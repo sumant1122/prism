@@ -30,37 +30,64 @@ function nodeColor(type: string): string {
 export default function GraphCanvas() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
-      const response = await fetch(`${API_BASE}/graph`);
-      const payload = (await response.json()) as GraphPayload;
-      setNodes(
-        payload.nodes.map((node, index) => ({
-          id: node.id,
-          data: { label: node.label },
-          position: { x: (index % 5) * 220, y: Math.floor(index / 5) * 150 },
-          style: {
-            background: nodeColor(node.type),
-            color: "white",
-            border: "none",
-            borderRadius: "10px",
-            padding: "6px 10px"
-          }
-        }))
-      );
-      setEdges(
-        payload.edges.map((edge) => ({
-          id: edge.id,
-          source: edge.source,
-          target: edge.target,
-          label: edge.type,
-          animated: edge.type === "RELATED_TO"
-        }))
-      );
+      try {
+        setError(null);
+        const response = await fetch(`${API_BASE}/graph`);
+        const payload = (await response.json()) as GraphPayload;
+        if (!response.ok) {
+          throw new Error("Failed to fetch graph.");
+        }
+        const safeNodes = (payload.nodes || [])
+          .filter((node) => node?.id && node?.label)
+          .map((node, index) => ({
+            id: node.id,
+            data: { label: node.label },
+            position: { x: (index % 6) * 220, y: Math.floor(index / 6) * 140 },
+            style: {
+              background: nodeColor(node.type),
+              color: "white",
+              border: "none",
+              borderRadius: "10px",
+              padding: "6px 10px"
+            }
+          }));
+        const nodeIds = new Set(safeNodes.map((n) => n.id));
+        const safeEdges = (payload.edges || [])
+          .filter((edge) => edge?.id && nodeIds.has(edge.source) && nodeIds.has(edge.target))
+          .map((edge) => ({
+            id: edge.id,
+            source: edge.source,
+            target: edge.target,
+            label: edge.type,
+            animated: edge.type === "RELATED_TO"
+          }));
+        setNodes(safeNodes);
+        setEdges(safeEdges);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load graph.");
+      } finally {
+        setLoading(false);
+      }
     };
     void load();
   }, []);
+
+  if (loading) {
+    return <div className="graph-frame" style={{ display: "grid", placeItems: "center" }}>Loading graph...</div>;
+  }
+
+  if (error) {
+    return <div className="graph-frame" style={{ display: "grid", placeItems: "center" }}>Graph error: {error}</div>;
+  }
+
+  if (!nodes.length) {
+    return <div className="graph-frame" style={{ display: "grid", placeItems: "center" }}>No graph data yet.</div>;
+  }
 
   return (
     <div className="graph-frame">
