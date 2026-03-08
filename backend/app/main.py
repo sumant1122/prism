@@ -19,28 +19,28 @@ from app.services.book_service import BookService
 
 def _build_llm_client() -> OpenAICompatibleJSONClient | None:
     settings = get_settings()
-    provider = settings.llm_provider.strip().lower()
+    provider = settings.model_provider.strip().lower()
 
     def build_openai() -> OpenAICompatibleJSONClient | None:
-        model = settings.llm_model or settings.openai_model
-        api_key = settings.llm_api_key or settings.openai_api_key
+        model = settings.openai_model
+        api_key = settings.openai_api_key
         if not api_key:
             return None
-        base_url = settings.llm_base_url
+        base_url = None
         return OpenAICompatibleJSONClient(model=model, api_key=api_key, base_url=base_url)
 
     def build_openrouter() -> OpenAICompatibleJSONClient | None:
-        model = settings.llm_model or settings.openrouter_model
-        api_key = settings.llm_api_key or settings.openrouter_api_key
+        model = settings.openrouter_model
+        api_key = settings.openrouter_api_key
         if not api_key:
             return None
-        base_url = settings.llm_base_url or settings.openrouter_base_url
+        base_url = settings.openrouter_base_url
         return OpenAICompatibleJSONClient(model=model, api_key=api_key, base_url=base_url)
 
     def build_ollama() -> OpenAICompatibleJSONClient:
-        model = settings.llm_model or settings.ollama_model
-        base_url = settings.llm_base_url or settings.ollama_base_url
-        return OpenAICompatibleJSONClient(model=model, api_key=settings.llm_api_key, base_url=base_url)
+        model = settings.ollama_model
+        base_url = settings.ollama_base_url
+        return OpenAICompatibleJSONClient(model=model, api_key=settings.ollama_api_key, base_url=base_url)
 
     if provider == "openai":
         return build_openai() or build_openrouter()
@@ -52,9 +52,9 @@ def _build_llm_client() -> OpenAICompatibleJSONClient | None:
         return build_ollama()
 
     if provider == "auto":
-        return build_openai() or build_openrouter() or build_ollama()
+        return build_openrouter() or build_openai()
 
-    return build_openai() or build_openrouter()
+    return build_openrouter() or build_openai()
 
 
 @asynccontextmanager

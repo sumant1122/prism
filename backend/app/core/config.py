@@ -15,15 +15,13 @@ class Settings(BaseSettings):
     neo4j_username: str = "neo4j"
     neo4j_password: str = "bookgraph"
 
-    llm_provider: str = "auto"
-    llm_model: str | None = None
-    llm_api_key: str | None = None
-    llm_base_url: str | None = None
+    model_provider: str = "auto"
 
     openrouter_api_key: str | None = None
     openrouter_model: str = "openai/gpt-4o-mini"
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
+    ollama_api_key: str | None = None
     ollama_model: str = "llama3.1:8b"
     ollama_base_url: str = "http://localhost:11434/v1"
 

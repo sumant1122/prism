@@ -98,19 +98,19 @@ flowchart LR
 Switch providers without code changes via environment variables:
 
 - OpenAI
-  - `LLM_PROVIDER=openai`
-  - `LLM_API_KEY=<your_key>`
-  - Optional: `LLM_MODEL=gpt-4o-mini`
+  - `MODEL_PROVIDER=openai`
+  - `OPENAI_API_KEY=<your_key>`
+  - Optional: `OPENAI_MODEL=gpt-4o-mini`
 - OpenRouter
-  - `LLM_PROVIDER=openrouter`
-  - `OPENROUTER_API_KEY=<your_key>` (or `LLM_API_KEY`)
-  - Optional: `OPENROUTER_MODEL=openai/gpt-4o-mini` (or `LLM_MODEL`)
+  - `MODEL_PROVIDER=openrouter`
+  - `OPENROUTER_API_KEY=<your_key>`
+  - Optional: `OPENROUTER_MODEL=openai/gpt-4o-mini`
 - Ollama
-  - `LLM_PROVIDER=ollama`
-  - Optional: `OLLAMA_BASE_URL=http://localhost:11434/v1` (or `LLM_BASE_URL`)
-  - Optional: `OLLAMA_MODEL=llama3.1:8b` (or `LLM_MODEL`)
+  - `MODEL_PROVIDER=ollama`
+  - Optional: `OLLAMA_BASE_URL=http://localhost:11434/v1`
+  - Optional: `OLLAMA_MODEL=llama3.1:8b`
 
-If no usable provider credentials are set, BookGraph falls back to heuristic concept/relationship extraction.
+Auto mode: `MODEL_PROVIDER=auto` uses OpenRouter first, then OpenAI (if keys are present). If no usable provider credentials are set, BookGraph falls back to deterministic heuristics.
 
 ## API Examples
 
