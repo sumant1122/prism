@@ -31,3 +31,18 @@ class InsightResponse(BaseModel):
     coverage: dict = Field(default_factory=dict)
     recommendations: list[str] = Field(default_factory=list)
     narrative: dict = Field(default_factory=dict)
+
+
+class ChatRequest(BaseModel):
+    question: str = Field(min_length=2, max_length=2000)
+    scope: str = Field(default="auto", pattern="^(auto|book|author|concept|field)$")
+    k: int = Field(default=20, ge=5, le=100)
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    confidence: float
+    citations: list[str] = Field(default_factory=list)
+    evidence_nodes: list[dict] = Field(default_factory=list)
+    evidence_edges: list[dict] = Field(default_factory=list)
+    context_size: dict = Field(default_factory=dict)

@@ -20,6 +20,7 @@ export default function RootLayout({
               <Link href="/books">Books</Link>
               <Link href="/graph">Graph</Link>
               <Link href="/insights">Insights</Link>
+              <Link href="/chat">Chat</Link>
             </nav>
           </div>
           {children}
@@ -28,4 +29,3 @@ export default function RootLayout({
     </html>
   );
 }
-

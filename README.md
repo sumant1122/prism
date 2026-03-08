@@ -31,6 +31,7 @@ bookgraph/
 - `POST /books` ingests a book title, fetches Open Library metadata, enriches with AI concepts/fields, and creates graph relationships.
 - `GET /graph` returns graph nodes and edges for visualization.
 - `GET /insights` returns central books, clusters, missing-topic coverage, graph stats, actionable recommendations, and an optional LLM-synthesized narrative.
+- `POST /chat` answers graph-aware questions by retrieving a relevant subgraph and grounding responses in node/edge evidence.
 
 ## Architecture
 

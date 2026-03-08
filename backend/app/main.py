@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.agents.chat_agent import ChatAgent
 from app.agents.concept_agent import ConceptAgent
 from app.agents.insight_agent import InsightAgent
 from app.agents.llm_client import OpenAICompatibleJSONClient
@@ -15,6 +16,7 @@ from app.graph.neo4j_client import GraphRepository
 from app.ingestion.openlibrary import OpenLibraryClient
 from app.insights.graph_insights import GraphInsightEngine
 from app.services.book_service import BookService
+from app.services.chat_service import ChatService
 
 
 def _build_llm_client() -> OpenAICompatibleJSONClient | None:
@@ -70,6 +72,7 @@ async def lifespan(app: FastAPI):
     concept_agent = ConceptAgent(llm_client=llm_client)
     relationship_agent = RelationshipAgent(llm_client=llm_client)
     insight_agent = InsightAgent(llm_client=llm_client)
+    chat_agent = ChatAgent(llm_client=llm_client)
     openlibrary_client = OpenLibraryClient(settings.openlibrary_base_url)
     app.state.graph_repo = graph_repo
     app.state.book_service = BookService(
@@ -80,6 +83,7 @@ async def lifespan(app: FastAPI):
         relationship_scan_limit=settings.relationship_scan_limit,
     )
     app.state.insight_engine = GraphInsightEngine(graph_repo, insight_agent=insight_agent)
+    app.state.chat_service = ChatService(graph_repo, chat_agent=chat_agent)
     try:
         yield
     finally:

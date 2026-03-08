@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.deps import get_book_service, get_graph_repo, get_insight_engine
-from app.api.schemas import AddBookRequest, BookResponse, GraphResponse, InsightResponse
+from app.api.deps import get_book_service, get_chat_service, get_graph_repo, get_insight_engine
+from app.api.schemas import AddBookRequest, BookResponse, ChatRequest, ChatResponse, GraphResponse, InsightResponse
 from app.graph.neo4j_client import GraphRepository
 from app.ingestion.openlibrary import OpenLibraryNotFoundError
 from app.insights.graph_insights import GraphInsightEngine
 from app.services.book_service import BookService
+from app.services.chat_service import ChatService
 
 router = APIRouter()
 
@@ -48,3 +49,19 @@ async def graph_snapshot(repo: GraphRepository = Depends(get_graph_repo)) -> Gra
 async def insights(engine: GraphInsightEngine = Depends(get_insight_engine)) -> InsightResponse:
     bundle = engine.build_insight_bundle()
     return InsightResponse(**bundle)
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(payload: ChatRequest, service: ChatService = Depends(get_chat_service)) -> ChatResponse:
+    try:
+        result = service.ask(question=payload.question, scope=payload.scope, k=payload.k)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)) from exc
+    return ChatResponse(
+        answer=result.answer,
+        confidence=result.confidence,
+        citations=result.citations,
+        evidence_nodes=result.evidence_nodes,
+        evidence_edges=result.evidence_edges,
+        context_size=result.context_size,
+    )

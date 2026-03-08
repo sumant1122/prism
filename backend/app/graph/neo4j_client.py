@@ -272,3 +272,105 @@ class GraphRepository:
         """
         with self._driver.session() as session:
             return session.run(query, limit=limit).data()
+
+    def get_chat_subgraph(
+        self,
+        question: str,
+        scope: str = "auto",
+        k: int = 20,
+    ) -> dict[str, list[dict[str, Any]]]:
+        terms = [token.strip().lower() for token in question.split() if len(token.strip()) >= 3][:12]
+        scope = scope.strip().lower()
+        label_filter = {
+            "book": "Book",
+            "author": "Author",
+            "concept": "Concept",
+            "field": "Field",
+        }.get(scope)
+        with self._driver.session() as session:
+            if label_filter:
+                seed_query = """
+                MATCH (n)
+                WHERE $label IN labels(n)
+                  AND any(term IN $terms WHERE
+                      toLower(coalesce(n.title, n.name, "")) CONTAINS term
+                      OR toLower(coalesce(n.description, "")) CONTAINS term
+                  )
+                RETURN elementId(n) AS id
+                LIMIT $k
+                """
+            else:
+                seed_query = """
+                MATCH (n)
+                WHERE any(term IN $terms WHERE
+                    toLower(coalesce(n.title, n.name, "")) CONTAINS term
+                    OR toLower(coalesce(n.description, "")) CONTAINS term
+                )
+                RETURN elementId(n) AS id
+                LIMIT $k
+                """
+
+            params = {"terms": terms, "k": k, "label": label_filter}
+            seed_ids = [row["id"] for row in session.run(seed_query, params).data()] if terms else []
+            if not seed_ids:
+                fallback_query = """
+                MATCH (b:Book)
+                RETURN elementId(b) AS id
+                ORDER BY coalesce(b.publish_year, 9999) ASC, b.title ASC
+                LIMIT $k
+                """
+                seed_ids = [row["id"] for row in session.run(fallback_query, k=k).data()]
+
+            if not seed_ids:
+                return {"nodes": [], "edges": []}
+
+            neighborhood_query = """
+            UNWIND $seed_ids AS sid
+            MATCH (s)
+            WHERE elementId(s) = sid
+            OPTIONAL MATCH (s)-[:WRITTEN_BY|MENTIONS|BELONGS_TO|RELATED_TO|INFLUENCED_BY|CONTRADICTS|EXPANDS]-(n)
+            WITH collect(DISTINCT elementId(s)) + collect(DISTINCT elementId(n)) AS rawNodeIds
+            UNWIND rawNodeIds AS nodeId
+            WITH DISTINCT nodeId
+            WHERE nodeId IS NOT NULL
+            RETURN nodeId
+            LIMIT $node_limit
+            """
+            node_ids = [row["nodeId"] for row in session.run(neighborhood_query, seed_ids=seed_ids, node_limit=max(k * 3, 20))]
+            if not node_ids:
+                node_ids = seed_ids
+
+            nodes_query = """
+            UNWIND $node_ids AS node_id
+            MATCH (n)
+            WHERE elementId(n) = node_id
+            RETURN elementId(n) AS id, labels(n) AS labels, properties(n) AS props
+            """
+            edges_query = """
+            UNWIND $node_ids AS node_id
+            MATCH (a)
+            WHERE elementId(a) = node_id
+            MATCH (a)-[r]->(b)
+            WHERE elementId(b) IN $node_ids
+            RETURN DISTINCT
+                elementId(r) AS id,
+                elementId(a) AS source,
+                elementId(b) AS target,
+                type(r) AS type
+            LIMIT $edge_limit
+            """
+            nodes = [
+                {
+                    "id": row["id"],
+                    "label": row["props"].get("title") or row["props"].get("name") or "Unknown",
+                    "type": (row["labels"][0].lower() if row["labels"] else "unknown"),
+                    "properties": row["props"],
+                }
+                for row in session.run(nodes_query, node_ids=node_ids).data()
+            ]
+            edges = session.run(
+                edges_query,
+                node_ids=node_ids,
+                edge_limit=max(k * 6, 30),
+            ).data()
+            return {"nodes": nodes, "edges": edges}
