@@ -3,8 +3,8 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "BookGraph",
-  description: "Book knowledge graph explorer"
+  title: "Prism",
+  description: "Enterprise knowledge graph explorer"
 };
 
 export default function RootLayout({
@@ -18,11 +18,11 @@ export default function RootLayout({
             <div className="topbar">
               <div className="topbar-row">
                 <div>
-                  <h1 className="brand-title">BookGraph</h1>
-                  <p className="brand-subtitle">AI Knowledge Graph for books, concepts, and relationships</p>
+                  <h1 className="brand-title">Prism</h1>
+                  <p className="brand-subtitle">AI Knowledge Graph for enterprise systems, resources, and dependencies</p>
                 </div>
                 <nav className="nav">
-                  <Link href="/books">Books</Link>
+                  <Link href="/books">Resources</Link>
                   <Link href="/graph">Graph</Link>
                   <Link href="/insights">Insights</Link>
                   <Link href="/chat">Chat</Link>
@@ -32,7 +32,7 @@ export default function RootLayout({
           </header>
           <section>
             <p className="page-subtitle">
-              Add books, enrich with AI, explore graph structure, and ask grounded questions.
+              Add enterprise resources, enrich with AI, explore graph structure, and ask grounded questions.
             </p>
           </section>
           <section>

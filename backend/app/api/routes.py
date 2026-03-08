@@ -2,13 +2,29 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.deps import get_book_service, get_chat_service, get_graph_repo, get_insight_engine
-from app.api.schemas import AddBookRequest, BookResponse, ChatRequest, ChatResponse, GraphResponse, InsightResponse
+from app.api.deps import (
+    get_book_service,
+    get_chat_service,
+    get_enterprise_service,
+    get_graph_repo,
+    get_insight_engine,
+)
+from app.api.schemas import (
+    AddBookRequest,
+    AddResourceRequest,
+    BookResponse,
+    ChatRequest,
+    ChatResponse,
+    GraphResponse,
+    InsightResponse,
+    ResourceResponse,
+)
 from app.graph.neo4j_client import GraphRepository
 from app.ingestion.openlibrary import OpenLibraryNotFoundError
 from app.insights.graph_insights import GraphInsightEngine
 from app.services.book_service import BookService
 from app.services.chat_service import ChatService
+from app.services.enterprise_service import EnterpriseService
 
 router = APIRouter()
 
@@ -33,6 +49,39 @@ async def add_book(payload: AddBookRequest, service: BookService = Depends(get_b
         publish_year=result.metadata.publish_year,
         subjects=result.metadata.subjects,
         description=result.metadata.description,
+        concepts=result.concepts,
+        fields=result.fields,
+        relationships_created=result.relationships_created,
+    )
+
+
+@router.post("/resources", response_model=ResourceResponse, status_code=status.HTTP_201_CREATED)
+async def add_resource(
+    payload: AddResourceRequest,
+    service: EnterpriseService = Depends(get_enterprise_service),
+) -> ResourceResponse:
+    try:
+        result = await service.ingest_resource(
+            source=payload.source,
+            identifier=payload.identifier,
+            overrides={
+                "name": payload.name,
+                "description": payload.description,
+                "owner": payload.owner,
+                "resource_count": payload.resource_count,
+                "tags": payload.tags,
+            },
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)) from exc
+    return ResourceResponse(
+        source=result.metadata.source,
+        external_id=result.metadata.external_id,
+        name=result.metadata.name,
+        owner=result.metadata.owner,
+        description=result.metadata.description,
+        resource_count=result.metadata.resource_count,
+        tags=result.metadata.tags,
         concepts=result.concepts,
         fields=result.fields,
         relationships_created=result.relationships_created,

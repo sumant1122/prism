@@ -5,6 +5,7 @@ from typing import Any
 from neo4j import GraphDatabase
 from neo4j.exceptions import CypherSyntaxError, Neo4jError
 
+from app.ingestion.connectors import EnterpriseMetadata
 from app.ingestion.openlibrary import BookMetadata
 
 
@@ -21,6 +22,8 @@ class GraphRepository:
             "CREATE CONSTRAINT author_name_unique IF NOT EXISTS FOR (a:Author) REQUIRE a.name IS UNIQUE",
             "CREATE CONSTRAINT concept_name_unique IF NOT EXISTS FOR (c:Concept) REQUIRE c.name IS UNIQUE",
             "CREATE CONSTRAINT field_name_unique IF NOT EXISTS FOR (f:Field) REQUIRE f.name IS UNIQUE",
+            "CREATE CONSTRAINT resource_external_unique IF NOT EXISTS FOR (r:Resource) REQUIRE r.external_id IS UNIQUE",
+            "CREATE CONSTRAINT platform_name_unique IF NOT EXISTS FOR (p:Platform) REQUIRE p.name IS UNIQUE",
         ]
         with self._driver.session() as session:
             for statement in constraints:
@@ -67,6 +70,76 @@ class GraphRepository:
         """
         with self._driver.session() as session:
             session.run(query, book_title=book_title, concepts=concepts, fields=fields).consume()
+
+    def upsert_enterprise_resource(
+        self,
+        metadata: EnterpriseMetadata,
+        concepts: list[str],
+        fields: list[str],
+    ) -> None:
+        query = """
+        MERGE (r:Resource {external_id: $external_id})
+        SET r.name = $name,
+            r.description = $description,
+            r.owner = $owner,
+            r.resource_count = $resource_count,
+            r.source = $source,
+            r.tags = $tags
+        MERGE (p:Platform {name: $source})
+        MERGE (r)-[:BELONGS_TO]->(p)
+        WITH r, $concepts AS concepts, $fields AS fields
+        FOREACH (concept IN concepts |
+            MERGE (c:Concept {name: concept})
+            MERGE (r)-[:MENTIONS]->(c)
+        )
+        FOREACH (field IN fields |
+            MERGE (f:Field {name: field})
+            MERGE (r)-[:BELONGS_TO]->(f)
+        )
+        """
+        with self._driver.session() as session:
+            session.run(
+                query,
+                external_id=metadata.external_id,
+                name=metadata.name,
+                description=metadata.description,
+                owner=metadata.owner,
+                resource_count=metadata.resource_count,
+                source=metadata.source,
+                tags=metadata.tags,
+                concepts=concepts,
+                fields=fields,
+            ).consume()
+
+    def get_resources_for_relationship_scan(self, exclude_external_id: str, limit: int) -> list[dict[str, Any]]:
+        query = """
+        MATCH (r:Resource)
+        WHERE r.external_id <> $exclude_external_id
+        OPTIONAL MATCH (r)-[:BELONGS_TO]->(f:Field)
+        RETURN r.external_id AS external_id,
+               r.name AS title,
+               r.description AS description,
+               collect(DISTINCT f.name) AS subjects
+        LIMIT $limit
+        """
+        with self._driver.session() as session:
+            return session.run(query, exclude_external_id=exclude_external_id, limit=limit).data()
+
+    def add_resource_relationship(self, source_external_id: str, relation: str, target_external_id: str) -> None:
+        if relation not in {"RELATED_TO", "INFLUENCED_BY", "CONTRADICTS", "EXPANDS", "BELONGS_TO"}:
+            return
+        query = f"""
+        MATCH (source:Resource {{external_id: $source_external_id}})
+        MATCH (target:Resource {{external_id: $target_external_id}})
+        MERGE (source)-[r:{relation}]->(target)
+        RETURN type(r) AS relation
+        """
+        with self._driver.session() as session:
+            session.run(
+                query,
+                source_external_id=source_external_id,
+                target_external_id=target_external_id,
+            ).consume()
 
     def get_books_for_relationship_scan(self, exclude_title: str, limit: int) -> list[dict[str, Any]]:
         query = """

@@ -13,10 +13,12 @@ from app.agents.relationship_agent import RelationshipAgent
 from app.api.routes import router
 from app.core.config import get_settings
 from app.graph.neo4j_client import GraphRepository
+from app.ingestion.connectors import EnterpriseConnectorClient
 from app.ingestion.openlibrary import OpenLibraryClient
 from app.insights.graph_insights import GraphInsightEngine
 from app.services.book_service import BookService
 from app.services.chat_service import ChatService
+from app.services.enterprise_service import EnterpriseService
 
 
 def _build_llm_client() -> OpenAICompatibleJSONClient | None:
@@ -89,6 +91,7 @@ async def lifespan(app: FastAPI):
     insight_agent = InsightAgent(llm_client=llm_client)
     chat_agent = ChatAgent(llm_client=llm_client)
     openlibrary_client = OpenLibraryClient(settings.openlibrary_base_url)
+    connector_client = EnterpriseConnectorClient()
     app.state.graph_repo = graph_repo
     app.state.book_service = BookService(
         openlibrary_client=openlibrary_client,
@@ -99,14 +102,22 @@ async def lifespan(app: FastAPI):
     )
     app.state.insight_engine = GraphInsightEngine(graph_repo, insight_agent=insight_agent)
     app.state.chat_service = ChatService(graph_repo, chat_agent=chat_agent)
+    app.state.enterprise_service = EnterpriseService(
+        connector_client=connector_client,
+        graph_repo=graph_repo,
+        concept_agent=concept_agent,
+        relationship_agent=relationship_agent,
+        relationship_scan_limit=settings.relationship_scan_limit,
+    )
     try:
         yield
     finally:
         await openlibrary_client.close()
+        await connector_client.close()
         graph_repo.close()
 
 
-app = FastAPI(title="BookGraph API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Prism API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

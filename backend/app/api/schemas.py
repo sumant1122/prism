@@ -7,12 +7,35 @@ class AddBookRequest(BaseModel):
     title: str = Field(min_length=1, max_length=300)
 
 
+class AddResourceRequest(BaseModel):
+    source: str = Field(pattern="^(github|servicenow|manual)$")
+    identifier: str = Field(min_length=1, max_length=300)
+    name: str | None = None
+    description: str | None = None
+    owner: str | None = None
+    resource_count: int | None = None
+    tags: list[str] = Field(default_factory=list)
+
+
 class BookResponse(BaseModel):
     title: str
     author: str
     publish_year: int | None = None
     subjects: list[str] = Field(default_factory=list)
     description: str = ""
+    concepts: list[str] = Field(default_factory=list)
+    fields: list[str] = Field(default_factory=list)
+    relationships_created: int = 0
+
+
+class ResourceResponse(BaseModel):
+    source: str
+    external_id: str
+    name: str
+    owner: str
+    description: str = ""
+    resource_count: int = 0
+    tags: list[str] = Field(default_factory=list)
     concepts: list[str] = Field(default_factory=list)
     fields: list[str] = Field(default_factory=list)
     relationships_created: int = 0
