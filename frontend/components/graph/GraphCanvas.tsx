@@ -63,7 +63,7 @@ export default function GraphCanvas() {
   }, []);
 
   return (
-    <div style={{ height: "70vh" }}>
+    <div className="graph-frame">
       <ReactFlow nodes={nodes} edges={edges} fitView>
         <MiniMap />
         <Controls />
@@ -72,4 +72,3 @@ export default function GraphCanvas() {
     </div>
   );
 }
-

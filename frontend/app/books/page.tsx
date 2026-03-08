@@ -49,41 +49,32 @@ export default function BooksPage() {
   return (
     <div className="grid">
       <div className="card">
-        <h2 style={{ marginTop: 0 }}>Add Book</h2>
-        <form onSubmit={onSubmit} style={{ display: "flex", gap: 10 }}>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Clean Code"
-            style={{ flex: 1 }}
-          />
+        <h2 className="page-title">Add Book</h2>
+        <p className="page-subtitle">Start ingestion by title. Metadata, concepts, and relationships are generated automatically.</p>
+        <form onSubmit={onSubmit} className="row">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Clean Code" style={{ flex: 1 }} />
           <button type="submit" disabled={loading}>
             {loading ? "Adding..." : "Add"}
           </button>
         </form>
-        {error && <p style={{ color: "#ad1f1f" }}>{error}</p>}
+        {error && <p style={{ color: "#ad1f1f", marginBottom: 0 }}>{error}</p>}
       </div>
       {result && (
         <div className="card">
-          <h3 style={{ marginTop: 0 }}>{result.title}</h3>
+          <h3 className="page-title">{result.title}</h3>
+          <div className="row" style={{ marginBottom: 8 }}>
+            <span className="chip">{result.author}</span>
+            <span className="chip">Year: {result.publish_year ?? "Unknown"}</span>
+            <span className="chip">Relationships: {result.relationships_created}</span>
+          </div>
           <p>
-            <strong>Author:</strong> {result.author}
+            <strong>Concepts:</strong> {result.concepts.join(", ") || "None detected yet"}
           </p>
           <p>
-            <strong>Publish Year:</strong> {result.publish_year ?? "Unknown"}
-          </p>
-          <p>
-            <strong>Concepts:</strong> {result.concepts.join(", ") || "None"}
-          </p>
-          <p>
-            <strong>Fields:</strong> {result.fields.join(", ") || "None"}
-          </p>
-          <p>
-            <strong>Relationships Created:</strong> {result.relationships_created}
+            <strong>Fields:</strong> {result.fields.join(", ") || "None detected yet"}
           </p>
         </div>
       )}
     </div>
   );
 }
-

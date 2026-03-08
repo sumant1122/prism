@@ -51,20 +51,16 @@ export default function ChatPage() {
   return (
     <div className="grid">
       <div className="card">
-        <h2 style={{ marginTop: 0 }}>Graph Chat</h2>
+        <h2 className="page-title">Graph Chat</h2>
+        <p className="page-subtitle">Ask graph-grounded questions with evidence-backed responses.</p>
         <form onSubmit={onSubmit} className="grid">
           <textarea
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             placeholder="What are the most connected software engineering books in my graph?"
-            style={{ minHeight: 110, padding: 10, borderRadius: 10, border: "1px solid #c7cfc7" }}
           />
-          <div style={{ display: "flex", gap: 10 }}>
-            <select
-              value={scope}
-              onChange={(event) => setScope(event.target.value)}
-              style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #c7cfc7" }}
-            >
+          <div className="row">
+            <select value={scope} onChange={(event) => setScope(event.target.value)}>
               <option value="auto">Auto scope</option>
               <option value="book">Books</option>
               <option value="author">Authors</option>
@@ -77,30 +73,30 @@ export default function ChatPage() {
               max={100}
               value={k}
               onChange={(event) => setK(Number(event.target.value))}
-              style={{ width: 110 }}
+              style={{ width: 118 }}
             />
             <button type="submit" disabled={loading}>
               {loading ? "Thinking..." : "Ask"}
             </button>
           </div>
         </form>
-        {error && <p style={{ color: "#ad1f1f" }}>{error}</p>}
+        {error && <p style={{ color: "#ad1f1f", marginBottom: 0 }}>{error}</p>}
       </div>
 
       {result && (
         <div className="grid two">
           <div className="card">
-            <h3 style={{ marginTop: 0 }}>Answer</h3>
+            <h3 className="page-title">Answer</h3>
             <p>{result.answer}</p>
-            <p>
-              <strong>Confidence:</strong> {(result.confidence * 100).toFixed(0)}%
-            </p>
-            <p>
-              <strong>Context:</strong> {result.context_size.nodes} nodes, {result.context_size.edges} edges
-            </p>
-            <p>
-              <strong>Mode:</strong> {result.mode} ({result.provider})
-            </p>
+            <div className="row">
+              <span className="chip">Confidence {(result.confidence * 100).toFixed(0)}%</span>
+              <span className="chip">
+                Context {result.context_size.nodes}N/{result.context_size.edges}E
+              </span>
+              <span className="chip">
+                {result.mode} via {result.provider}
+              </span>
+            </div>
             {result.fallback_reason && (
               <p>
                 <strong>Fallback reason:</strong> {result.fallback_reason}
@@ -108,7 +104,7 @@ export default function ChatPage() {
             )}
           </div>
           <div className="card">
-            <h3 style={{ marginTop: 0 }}>Evidence Nodes</h3>
+            <h3 className="page-title">Evidence Nodes</h3>
             <p>
               {result.evidence_nodes
                 .slice(0, 8)

@@ -110,7 +110,7 @@ export default function InsightsPage() {
   return (
     <div className="grid two">
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Graph Health</h3>
+        <h3 className="page-title">Graph Health</h3>
         <p style={{ fontSize: 28, margin: "6px 0" }}>
           {data.quality_scores?.overall_score ?? data.narrative.graph_health_score}/100
         </p>
@@ -124,12 +124,12 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>LLM Summary</h3>
+        <h3 className="page-title">LLM Summary</h3>
         <p>{data.narrative.summary}</p>
         <p>{data.time_delta.summary}</p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Central Books</h3>
+        <h3 className="page-title">Central Books</h3>
         <p>{data.central_books.summary}</p>
         <p>
           {data.central_books.central_books
@@ -142,7 +142,7 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Clusters</h3>
+        <h3 className="page-title">Clusters</h3>
         <p>Detected {data.clusters.cluster_count} groups.</p>
         <p>
           {data.clusters.clusters
@@ -152,7 +152,7 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Missing Topics</h3>
+        <h3 className="page-title">Missing Topics</h3>
         <p>{data.missing_topics.summary}</p>
         <p>
           {data.missing_topics.missing_topics
@@ -161,7 +161,7 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Coverage</h3>
+        <h3 className="page-title">Coverage</h3>
         <p>
           <strong>Top fields:</strong>{" "}
           {data.coverage.top_fields.map((f) => `${f.field} (${f.bookCount})`).join(", ") || "N/A"}
@@ -178,7 +178,7 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Recommendations</h3>
+        <h3 className="page-title">Recommendations</h3>
         <p>
           {data.recommendations
             .map((rec) => `[${rec.effort}] ${rec.action}`)
@@ -187,14 +187,14 @@ export default function InsightsPage() {
         <p>{data.narrative.recommended_actions?.join(" ")}</p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Quality Breakdown</h3>
+        <h3 className="page-title">Quality Breakdown</h3>
         <p>Relationship quality: {data.quality_scores.breakdown.relationship_quality}</p>
         <p>Concept coverage: {data.quality_scores.breakdown.concept_coverage}</p>
         <p>Cluster cohesion: {data.quality_scores.breakdown.cluster_cohesion}</p>
         <p>Link completeness: {data.quality_scores.breakdown.link_completeness}</p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Reading Paths</h3>
+        <h3 className="page-title">Reading Paths</h3>
         <p>
           {data.reading_paths
             .map((path) => `${path.field}: ${path.path.map((item) => item.title).join(" -> ")}`)
@@ -202,7 +202,7 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Overlap vs Contradictions</h3>
+        <h3 className="page-title">Overlap vs Contradictions</h3>
         <p>
           Overlap links: {data.overlap_contradiction.overlap_count}, Contradictions:{" "}
           {data.overlap_contradiction.contradiction_count}
@@ -215,7 +215,7 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Sparse Bridges</h3>
+        <h3 className="page-title">Sparse Bridges</h3>
         <p>
           {data.sparse_bridges
             .map((b) => `${b.field_a} <-> ${b.field_b}`)
@@ -223,7 +223,7 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Field Dashboards</h3>
+        <h3 className="page-title">Field Dashboards</h3>
         <p>
           {data.field_dashboards
             .slice(0, 3)
