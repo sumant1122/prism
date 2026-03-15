@@ -110,7 +110,7 @@ export default function InsightsPage() {
   return (
     <div className="grid two">
       <div className="card">
-        <h3 className="page-title">Graph Health</h3>
+        <h3 className="page-title">Learning Graph Health</h3>
         <p style={{ fontSize: 28, margin: "6px 0" }}>
           {data.quality_scores?.overall_score ?? data.narrative.graph_health_score}/100
         </p>
@@ -124,12 +124,12 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="card">
-        <h3 className="page-title">LLM Summary</h3>
+        <h3 className="page-title">Teaching Summary</h3>
         <p>{data.narrative.summary}</p>
         <p>{data.time_delta.summary}</p>
       </div>
       <div className="card">
-        <h3 className="page-title">Central Resources</h3>
+        <h3 className="page-title">Central Repositories</h3>
         <p>{data.central_resources.summary}</p>
         <p>
           {data.central_resources.central_resources
@@ -152,7 +152,7 @@ export default function InsightsPage() {
         </p>
       </div>
       <div className="card">
-        <h3 className="page-title">Missing Topics</h3>
+        <h3 className="page-title">Missing Concepts</h3>
         <p>{data.missing_topics.summary}</p>
         <p>
           {data.missing_topics.missing_topics

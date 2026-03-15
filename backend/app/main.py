@@ -106,7 +106,7 @@ async def lifespan(app: FastAPI):
         graph_repo.close()
 
 
-app = FastAPI(title="Prism API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Repo Teacher API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

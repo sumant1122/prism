@@ -51,13 +51,13 @@ export default function ChatPage() {
   return (
     <div className="grid">
       <div className="card">
-        <h2 className="page-title">Graph Chat</h2>
-        <p className="page-subtitle">Ask graph-grounded questions with evidence-backed responses.</p>
+        <h2 className="page-title">Repo Chat</h2>
+        <p className="page-subtitle">Ask grounded questions about concepts, relationships, and architecture in the analyzed repos.</p>
         <form onSubmit={onSubmit} className="grid">
           <textarea
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Which resources have the highest blast radius in the platform layer?"
+            placeholder="Which repo in the graph seems best for learning async programming first?"
           />
           <div className="row">
             <select value={scope} onChange={(event) => setScope(event.target.value)}>

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from app.agents.concept_agent import ConceptAgent
+from app.agents.concept_agent import ConceptAgent, LearningPathStep, RepoConceptInsight
 from app.agents.relationship_agent import RelationshipAgent
 from app.graph.neo4j_client import GraphRepository
 from app.ingestion.connectors import EnterpriseConnectorClient, EnterpriseMetadata
@@ -15,6 +15,12 @@ class EnterpriseIngestionResult:
     concepts: list[str]
     fields: list[str]
     relationships_created: int
+    repo_summary: str
+    architecture_summary: str
+    concept_details: list[RepoConceptInsight]
+    learning_path: list[LearningPathStep]
+    detected_patterns: list[str]
+    languages: list[str]
 
 
 class EnterpriseService:
@@ -40,17 +46,52 @@ class EnterpriseService:
         overrides: dict[str, Any] | None = None,
     ) -> EnterpriseIngestionResult:
         metadata = await self._connector_client.fetch(source=source, identifier=identifier, overrides=overrides)
-        extraction = self._concept_agent.extract(
-            metadata.description,
-            fallback_subjects=[metadata.source, *metadata.tags],
-        )
-        self._graph_repo.upsert_enterprise_resource(metadata, extraction.concepts, extraction.fields)
+        repo_summary = metadata.description
+        architecture_summary = ""
+        concept_details: list[RepoConceptInsight] = []
+        learning_path: list[LearningPathStep] = []
+        detected_patterns: list[str] = []
+        languages: list[str] = [str(language) for language in metadata.raw.get("languages", [])] if metadata.source == "github" else []
+
+        if metadata.source == "github":
+            repo_report = self._concept_agent.analyze_repository(
+                {
+                    **metadata.raw,
+                    "name": metadata.name,
+                    "full_name": metadata.external_id,
+                    "description": metadata.description,
+                    "topics": metadata.tags,
+                }
+            )
+            concepts = [concept.name for concept in repo_report.concepts]
+            fields = repo_report.fields
+            repo_summary = repo_report.repo_summary
+            architecture_summary = repo_report.architecture_summary
+            concept_details = repo_report.concepts
+            learning_path = repo_report.learning_path
+            detected_patterns = repo_report.detected_patterns
+            languages = repo_report.languages
+        else:
+            extraction = self._concept_agent.extract(
+                metadata.description,
+                fallback_subjects=[metadata.source, *metadata.tags],
+            )
+            concepts = extraction.concepts
+            fields = extraction.fields
+
+        self._graph_repo.upsert_enterprise_resource(metadata, concepts, fields)
         relationships = self._discover_relationships(metadata)
         return EnterpriseIngestionResult(
             metadata=metadata,
-            concepts=extraction.concepts,
-            fields=extraction.fields,
+            concepts=concepts,
+            fields=fields,
             relationships_created=relationships,
+            repo_summary=repo_summary,
+            architecture_summary=architecture_summary,
+            concept_details=concept_details,
+            learning_path=learning_path,
+            detected_patterns=detected_patterns,
+            languages=languages,
         )
 
     def _discover_relationships(self, new_resource: EnterpriseMetadata) -> int:
@@ -75,4 +116,3 @@ class EnterpriseService:
             )
             created += 1
         return created
-

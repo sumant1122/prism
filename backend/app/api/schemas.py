@@ -13,6 +13,21 @@ class AddResourceRequest(BaseModel):
     tags: list[str] = Field(default_factory=list)
 
 
+class ConceptDetailResponse(BaseModel):
+    name: str
+    category: str
+    summary: str
+    importance: str
+    evidence: list[str] = Field(default_factory=list)
+    learn_next: str
+    confidence: float
+
+
+class LearningPathStepResponse(BaseModel):
+    title: str
+    description: str
+
+
 class ResourceResponse(BaseModel):
     source: str
     external_id: str
@@ -24,6 +39,12 @@ class ResourceResponse(BaseModel):
     concepts: list[str] = Field(default_factory=list)
     fields: list[str] = Field(default_factory=list)
     relationships_created: int = 0
+    repo_summary: str = ""
+    architecture_summary: str = ""
+    concept_details: list[ConceptDetailResponse] = Field(default_factory=list)
+    learning_path: list[LearningPathStepResponse] = Field(default_factory=list)
+    detected_patterns: list[str] = Field(default_factory=list)
+    languages: list[str] = Field(default_factory=list)
 
 
 class GraphResponse(BaseModel):

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import asdict
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import (
@@ -59,6 +61,12 @@ async def add_resource(
         concepts=result.concepts,
         fields=result.fields,
         relationships_created=result.relationships_created,
+        repo_summary=result.repo_summary,
+        architecture_summary=result.architecture_summary,
+        concept_details=[asdict(item) for item in result.concept_details],
+        learning_path=[asdict(item) for item in result.learning_path],
+        detected_patterns=result.detected_patterns,
+        languages=result.languages,
     )
 
 

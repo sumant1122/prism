@@ -3,8 +3,8 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Prism",
-  description: "Enterprise knowledge graph explorer"
+  title: "Repo Teacher",
+  description: "Learn computer science concepts through your own GitHub repository."
 };
 
 export default function RootLayout({
@@ -18,11 +18,11 @@ export default function RootLayout({
             <div className="topbar">
               <div className="topbar-row">
                 <div>
-                  <h1 className="brand-title">Prism</h1>
-                  <p className="brand-subtitle">AI Knowledge Graph for enterprise systems, resources, and dependencies</p>
+                  <h1 className="brand-title">Repo Teacher</h1>
+                  <p className="brand-subtitle">AI-guided repo analysis that teaches the CS concepts already living in your code</p>
                 </div>
                 <nav className="nav">
-                  <Link href="/resources">Resources</Link>
+                  <Link href="/resources">Analyze</Link>
                   <Link href="/graph">Graph</Link>
                   <Link href="/insights">Insights</Link>
                   <Link href="/chat">Chat</Link>
@@ -32,7 +32,7 @@ export default function RootLayout({
           </header>
           <section>
             <p className="page-subtitle">
-              Add enterprise resources, enrich with AI, explore graph structure, and ask grounded questions.
+              Turn a GitHub repo into an explainable concept map, then explore the patterns, architecture, and learning path behind it.
             </p>
           </section>
           <section>
