@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import RepoTeacherExperience from "@/components/RepoTeacherExperience";
 
 export default function HomePage() {
-  redirect("/resources");
+  return <RepoTeacherExperience />;
 }
